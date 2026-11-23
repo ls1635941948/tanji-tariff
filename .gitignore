@@ -1,0 +1,8 @@
+runtime/
+qa/
+.DS_Store
+*.tmp
+__pycache__/
+data/hts-full.json
+public/data/hts-offline.json
+dist/

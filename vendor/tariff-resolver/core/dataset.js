@@ -1,0 +1,143 @@
+/**
+ * Pure dataset core: builds the HTS hierarchy from a USITC dump and answers lookups.
+ * No Node APIs — this file also runs inside a Cloudflare Worker bundle.
+ */
+                                                                                    
+import { foldText, needleMatcher, normalizeOrigin } from "./origin.js";
+
+// Matches the schedule's own "this heading is dead" markers (broadened in 1.0.3).
+const TERMINATED_RX =
+  /provision (?:is |was )?(?:terminated|suspended)|no longer in effect|provision has expired|expired at the close/i;
+
+/** The bracketed "[Compiler's note: ...]" the USITC prints on some Chapter 99 headings. */
+export function compilerNote(e                  )                {
+  const m = e.path.match(/\[Compiler's note:\s*([^\]]+)\]/i);
+  return m ? m[1].trim() : null;
+}
+
+export const EMPTY_OVERRIDES            = { version: "none", entries: [] };
+
+export function buildDataset(dump      , overrides            = EMPTY_OVERRIDES)          {
+  const entries             = [];
+                                                                                                        
+  const stack          = [];
+  for (const r of dump.rows) {
+    const ind = Number(r.indent || 0);
+    while (stack.length && stack[stack.length - 1].indent >= ind) stack.pop();
+    const path = [...stack.map((s) => s.description), r.description]
+      .map((s) => (s ?? "").trim().replace(/:$/, ""))
+      .filter(Boolean)
+      .join(" > ");
+    // Inherit rates only for statistical suffixes (>= 9 digits); an 8-digit line without
+    // rates is a structural heading and must not inherit across heading levels.
+    let eg = r.general || "", es = r.special || "", eo = r.other || "", inherited = false;
+    if (!eg && (r.htsno || "").replace(/\D/g, "").length >= 9) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].general) { eg = stack[i].general; es = es || stack[i].special; eo = eo || stack[i].other; inherited = true; break; }
+      }
+    }
+    entries.push({ ...r, path, eff_general: eg, eff_special: es, eff_other: eo, rate_inherited: inherited, terminated: TERMINATED_RX.test(path) });
+    stack.push({ indent: ind, description: r.description ?? "", general: r.general || "", special: r.special || "", other: r.other || "" });
+  }
+  const rateLines = entries.filter((e) => e.htsno && e.htsno.replace(/\D/g, "").length >= 8 && !e.htsno.startsWith("99"));
+  const ch99 = entries.filter((e) => e.htsno?.startsWith("99"));
+  return { fetched_at: dump.fetched_at, source: dump.source, license: dump.license, entries, rateLines, ch99, overrides };
+}
+
+/** Keyword scoring over the full path; prefers 10-digit leaf lines on ties. */
+export function searchCandidates(ds         , query        , limit = 5)             {
+  const q = query.toLowerCase();
+  const words = q.replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((w) => w.length > 2);
+  if (!words.length) return [];
+  return ds.rateLines
+    .map((e) => {
+      const hay = e.path.toLowerCase();
+      let score = 0;
+      if (hay.includes(q)) score += 8;
+      for (const w of words) if (hay.includes(w)) score += 1;
+      if (e.htsno.replace(/\D/g, "").length >= 10) score += 0.5;
+      return { e, score };
+    })
+    .filter((x) => x.score >= Math.min(2, words.length))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((x) => x.e);
+}
+
+/** Exact digits match first, then prefix match (max 10). */
+export function findByCode(ds         , code        )             {
+  const digits = code.replace(/\D/g, "");
+  if (!digits) return [];
+  const exact = ds.rateLines.filter((e) => e.htsno.replace(/\D/g, "") === digits);
+  if (exact.length) return exact;
+  return ds.rateLines.filter((e) => e.htsno.replace(/\D/g, "").startsWith(digits)).slice(0, 10);
+}
+
+/** Chapter 99 headings whose text names the origin (raw candidates; the caller decides). */
+export function ch99ForOrigin(ds         , origin        , limit = 25)             {
+  const o = normalizeOrigin(origin);
+  return o ? ch99ForNeedles(ds, o.needles, limit) : [];
+}
+
+/**
+ * Chapter 99 headings whose text names any of the needles as a whole word or phrase (see
+ * needleMatcher — a bare substring test made Oman match "Romania"). `limit` stays available
+ * for callers that want a short preview list; resolveDuty passes no cap (Infinity) because the
+ * chapter filter, not a positional slice, is the relevance gate — a positional cut here
+ * silently drops live headings that sort late (Section 301 exclusions, four-year review).
+ */
+export function ch99ForNeedles(ds         , needles          , limit = 25)             {
+  const matchers = needles.map(needleMatcher);
+  return ds.ch99.filter((e) => { const hay = foldText(e.path); return matchers.some((m) => m(hay)); }).slice(0, limit);
+}
+
+/** Headings that apply to every origin ("any country" wording), live only. */
+export function ch99Universal(ds         , limit = 10)             {
+  const rx = /all countries|any country|from all|of any country/i;
+  return ds.ch99.filter((e) => !e.terminated && rx.test(e.path)).slice(0, limit);
+}
+
+/**
+ * Same wording match as ch99Universal but including dead headings, so callers can count them.
+ * Unlimited by default — resolveDuty's chapter filter, not a positional slice, decides relevance.
+ */
+export function ch99UniversalAll(ds         , limit = Infinity)             {
+  const rx = /all countries|any country|from all|of any country/i;
+  return ds.ch99.filter((e) => rx.test(e.path)).slice(0, limit);
+}
+
+/** Headings referenced by the rate line's own footnotes ("See 9903.88.15.") — the precise link. */
+export function ch99FromFootnotes(ds         , e          )             {
+  const refs = new Set        ();
+  for (const f of e.footnotes ?? []) for (const m of (f.value ?? "").matchAll(/99\d{2}\.\d{2}(?:\.\d{2})?/g)) refs.add(m[0]);
+  if (!refs.size) return [];
+  return ds.ch99.filter((c) => [...refs].some((r) => c.htsno.startsWith(r)));
+}
+
+/** "+ 25%" inside a Chapter 99 rule -> 25; null when the rule has another shape. */
+export const parseAdderPct = (rule        )                => {
+  const m = rule.match(/\+\s*([\d.]+)\s*%/);
+  return m ? Number(m[1]) : null;
+};
+/** "7.2%" -> 7.2; "Free" -> 0; null for specific/compound duties ("12.4¢/kg"). */
+export const parseRatePct = (rate        )                => {
+  if (/^free$/i.test(rate.trim())) return 0;
+  const m = rate.trim().match(/^([\d.]+)\s*%$/);
+  return m ? Number(m[1]) : null;
+};
+
+/** Fixed US import fees — CBP's published FY2026 figures (Oct 2025 – Sep 2026). */
+export const FEES = {
+  fee_year: "FY2026",
+  mpf: { rate: 0.003464, min_usd: 33.58, max_usd: 651.5, note: "Merchandise Processing Fee FY2026 — verify current min/max at cbp.gov before final decisions" },
+  hmf: { rate: 0.00125, note: "Harbor Maintenance Fee — ocean shipments only, no min/max" },
+};
+
+/** Curated status override for a heading: the most specific (longest) matching prefix wins. */
+export function findOverride(overrides           , heading        )                       {
+  let best                       = null;
+  for (const o of overrides.entries) {
+    if (heading.startsWith(o.match) && (!best || o.match.length > best.match.length)) best = o;
+  }
+  return best;
+}

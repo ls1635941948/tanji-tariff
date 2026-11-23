@@ -1,0 +1,14 @@
+{
+  "name": "tanji-tariff",
+  "version": "1.0.0",
+  "private": true,
+  "description": "探迹关税：手机可安装的美国 HTS 税则查询应用",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node scripts/prepare-data.mjs && node server.mjs",
+    "test": "node scripts/prepare-data.mjs && node --test lib/*.test.mjs tests/*.test.mjs",
+    "prepare-data": "node scripts/prepare-data.mjs",
+    "update-data": "node scripts/update-data.mjs"
+  }
+}

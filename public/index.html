@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="探迹关税：查询美国 HTS 编码与基础税率，查看加征税核验线索与官方来源。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="探迹关税">
+  <title>探迹关税 · 美国进口关税查询</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <a class="brand" href="/" aria-label="探迹关税首页">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M7 7h14M14 7v14M7 14h14"/><path d="m18 18 4 4m-4 0h4v-4"/></svg></span>
+        <span class="brand-name">探迹<span>关税</span></span>
+      </a>
+      <button id="install-button" class="install-button" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M4 13v4h12v-4"/></svg><span>添加到手机</span></button>
+    </header>
+
+    <aside id="offline-banner" class="offline-banner" role="status" hidden><span aria-hidden="true">◌</span><p>离线模式 · 当前使用设备保存的税则快照，联网后可更新。</p></aside>
+    <main>
+      <section class="search-section" aria-labelledby="main-title">
+        <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> 出口美国，从税则查起</div>
+        <h1 id="main-title">查清关税，<br class="mobile-break">出海心中有数。</h1>
+        <p class="hero-copy">输入 HS / HTS 编码，查美国基础税率与加征核验线索。</p>
+        <div class="trade-lane" aria-label="当前查询范围：中国原产商品进口美国">
+          <span class="country"><span class="country-flag" aria-hidden="true">🇨🇳</span><span>中国原产</span></span>
+          <span class="lane-arrow" aria-hidden="true"><svg viewBox="0 0 40 16"><path d="M1 8h36m-6-5 6 5-6 5"/></svg></span>
+          <span class="country"><span class="country-flag" aria-hidden="true">🇺🇸</span><span>美国进口</span></span>
+          <span class="lane-tag">US HTS</span>
+        </div>
+        <form id="search-form" class="search-form" role="search">
+          <label class="sr-only" for="search-input">HS 编码或商品关键词</label>
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+          <input id="search-input" name="q" type="search" placeholder="输入 HS 编码或英文品名" maxlength="100" autocomplete="off" enterkeyhint="search" autocapitalize="off" spellcheck="false" required>
+          <button id="search-submit" type="submit"><span>查询</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>
+        </form>
+        <div class="search-examples"><span>试试</span><button type="button" data-query="392590">392590</button><button type="button" data-query="850440">850440</button><button type="button" data-query="wood">wood 木制品</button></div>
+        <p class="search-help">支持编码前缀与英文品名；中文支持常用品类关键词。</p>
+      </section>
+
+      <section id="history-section" class="history-section" hidden aria-labelledby="history-title">
+        <div class="section-label"><h2 id="history-title">最近查询</h2><button id="clear-history" class="text-button" type="button">清空</button></div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <section class="workspace" aria-labelledby="results-title">
+        <div class="workspace-head">
+          <div class="tabs" role="tablist" aria-label="内容选择">
+            <button id="query-tab" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="query-panel">税则查询</button>
+            <button id="favorites-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="favorites-panel">我的收藏 <span id="favorites-count" class="count-badge">0</span></button>
+          </div>
+          <span class="data-indicator"><span aria-hidden="true"></span>官方税则数据</span>
+        </div>
+        <div id="query-panel" role="tabpanel" aria-labelledby="query-tab">
+          <div id="welcome-state" class="welcome-state">
+            <div class="welcome-top"><div class="welcome-icon" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M12 8h16l5 5v23H12z"/><path d="M27 8v7h6M17 21h11m-11 6h7"/><circle cx="31" cy="31" r="7"/><path d="m36 36 4 4"/></svg></div><div><h2>把税率和依据一起查明白</h2><p>从 6 位 HS 开始，找到美国细分税号。</p></div></div>
+            <div class="feature-grid">
+              <div><span class="feature-number">01</span><h3>基础税率</h3><p>查看美国进口税则<br>与具体商品描述</p></div>
+              <div><span class="feature-number">02</span><h3>加征核验</h3><p>查看关联条款线索<br>核对适用条件</p></div>
+              <div><span class="feature-number">03</span><h3>官方依据</h3><p>保留数据版本<br>一键前往原始来源</p></div>
+            </div>
+          </div>
+          <div id="results-meta" class="results-meta" hidden><h2 id="results-title">查询结果</h2><span id="results-count"></span></div>
+          <div id="query-status" class="query-status" aria-live="polite" aria-atomic="true"></div>
+          <div id="results-list" class="results-list"></div>
+          <button id="load-more" type="button" class="load-more" hidden>查看更多结果<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg></button>
+        </div>
+        <div id="favorites-panel" role="tabpanel" aria-labelledby="favorites-tab" hidden>
+          <div id="favorites-list" class="results-list"></div>
+          <div id="favorites-empty" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">☆</span><h2>把常查的税号留在这里</h2><p>点击查询结果旁的星标，即可收藏到这台设备。</p><button class="soft-button" id="back-to-query" type="button">去查询</button></div>
+        </div>
+      </section>
+
+      <aside class="scope-note"><span class="note-icon" aria-hidden="true">i</span><p><strong>看清税率适用范围</strong>基础税率不代表最终综合税负。加征税、反倾销及反补贴，需结合原产地、商品范围与生效时间核验。</p></aside>
+    </main>
+
+    <footer class="app-footer"><div class="footer-top"><span class="footer-brand">探迹关税</span><a href="https://hts.usitc.gov/" target="_blank" rel="noopener noreferrer">USITC 官方税则 <span aria-hidden="true">↗</span></a></div><p id="data-version">正在读取税则数据版本…</p><p id="offline-save-status" class="offline-save-status" hidden></p><p class="footer-caption">仅供查询与核对，申报以海关及主管机构认定为准。</p></footer>
+  </div>
+
+  <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title"><div class="dialog-inner"><div class="sheet-handle" aria-hidden="true"></div><div class="dialog-top"><span>税号详情</span><button class="icon-button" type="button" data-close="detail-dialog" aria-label="关闭税号详情"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div id="detail-content"></div></div></dialog>
+  <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-title"><div class="dialog-inner"><div class="sheet-handle" aria-hidden="true"></div><div class="dialog-top"><span>随时查关税</span><button class="icon-button" type="button" data-close="install-dialog" aria-label="关闭安装说明"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="install-content"><div class="install-app-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M7 7h14M14 7v14M7 14h14"/><path d="m18 18 4 4m-4 0h4v-4"/></svg></div><h2 id="install-title">把探迹关税放到手机桌面</h2><p>下次轻点图标，就能直接打开查询。</p><div id="install-context"></div><p id="install-offline-status" class="install-offline-status">添加后首次打开 App，请保持联网片刻，以保存完整离线基础税则。</p><button id="native-install" class="primary-wide" type="button" hidden>安装探迹关税</button><div class="install-steps" id="install-steps"><section><h3><span>1</span> iPhone / iPad</h3><p>使用 Safari 打开本页，点击「分享」<span class="share-glyph" aria-hidden="true">↑</span>，选择「添加到主屏幕」。若出现「作为网页 App 打开」，保持开启后点「添加」。</p></section><section><h3><span>2</span> 安卓手机</h3><p>使用 Chrome 等浏览器打开，点击菜单中的「安装应用」或「添加到主屏幕」。</p></section></div><p class="install-footnote">在微信内请点击右上角「···」，选择在浏览器中打开。<br>试用入口由当前电脑提供，首次打开与在线更新时需保持电脑开机。保存基础税则后可离线查询。</p></div></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

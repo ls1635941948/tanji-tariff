@@ -1,0 +1,8 @@
+runtime/
+qa/
+tests/
+**/*.test.mjs
+.DS_Store
+*.zip
+启动探迹关税.command
+public/phone-qr.png

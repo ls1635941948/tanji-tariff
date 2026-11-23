@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/opsloft/tariff-resolver",
+  "commit": "3968b88125ec09653c4c7fad9ec0f0dd403260e4",
+  "version": "1.1.1",
+  "license": "MIT",
+  "retrievedAt": "2026-11-23",
+  "files": "src/core/*.ts transpiled to JavaScript by Node stripTypeScriptTypes; no semantic changes. Upstream fixed-fee logic is not used.",
+  "overrides": "Historical status annotations from upstream, version 2026-09-04; not current applicability decisions."
+}

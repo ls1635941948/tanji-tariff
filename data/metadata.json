@@ -1,0 +1,16 @@
+{
+  "version": "2026 HTS Revision 23",
+  "year": 2026,
+  "revision": 23,
+  "released_at": "2026-11-10",
+  "fetched_at": "2026-11-23T03:37:10.353Z",
+  "source": "https://hts.usitc.gov/reststop/exportList?from=0101&to=9999&format=JSON&styles=false",
+  "version_source": "https://www.usitc.gov/harmonized_tariff_information",
+  "license": "U.S. Government public domain",
+  "license_source": "https://catalog.data.gov/dataset/harmonized-tariff-schedule-of-the-united-states-2025",
+  "raw_sha256": "532e0c00ff4300e1e0844b7e4e46d38769f5e66575ad552964d73a12ceabd709",
+  "row_count": 35805,
+  "coverage": "HTS chapters 01–99, excluding reserved chapter 77",
+  "mode": "official_snapshot",
+  "transport": "fetch"
+}
