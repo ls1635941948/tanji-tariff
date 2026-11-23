@@ -66,11 +66,22 @@ self.addEventListener('install', event => event.waitUntil((async () => {
 })()));
 
 self.addEventListener('activate', event => event.waitUntil((async () => {
+  const previousShells = (await caches.keys()).filter(key => key.startsWith(PREFIX) && key.endsWith(':shell') && key !== SHELL);
   await self.clients.claim();
   await saveData();
   if (await announceReady()) {
     for (const key of await caches.keys()) {
       if (key.startsWith(PREFIX) && ![SHELL, DATA].includes(key)) await caches.delete(key);
+    }
+  }
+  if (previousShells.length) {
+    // Reload installed pages after preparing the corrected modules. Do not wait
+    // for navigation here: its fetch can wait for this activation to finish.
+    for (const client of await self.clients.matchAll({ type: 'window' })) {
+      const url = new URL(client.url);
+      if (url.origin === self.location.origin && url.pathname.startsWith(BASE)) {
+        void client.navigate(client.url).catch(() => {});
+      }
     }
   }
 })()));

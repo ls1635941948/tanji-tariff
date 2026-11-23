@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "codes": ["7308903000"],
+      "origin": "CN",
+      "destination": "US",
+      "snapshotVersion": "2026 HTS Revision 23",
+      "reviewedAt": "2026-11-23",
+      "baseRatePct": 0,
+      "referenceRatePct": 75,
+      "scenario": "中国原产、进口美国、不符合美国钢优惠且无适用排除的一般情形",
+      "components": [
+        {
+          "label": "基础税率 · Column 1 General",
+          "ratePct": 0,
+          "heading": "7308.90.30.00",
+          "basis": "full_customs_value",
+          "sourceUrl": "https://hts.usitc.gov/search?query=7308.90.30.00"
+        },
+        {
+          "label": "钢铁加征 · Section 232",
+          "ratePct": 50,
+          "heading": "9903.82.02",
+          "basis": "full_customs_value",
+          "sourceUrl": "https://content.govdelivery.com/accounts/USDHSCBP/bulletins/4117593"
+        },
+        {
+          "label": "对华加征 · Section 301",
+          "ratePct": 25,
+          "heading": "9903.88.02",
+          "basis": "full_customs_value",
+          "sourceUrl": "https://learning.usitc.gov/hts-docs/documents/China%20Tariffs.pdf"
+        }
+      ],
+      "conditions": [
+        "仅对美国 HTS 7308.90.30.00 的此项核对有效；须确认商品确为相应钢结构柱、梁等且不含合金钢，不能将同一六位 HS 下其他商品自动按 75% 处理。",
+        "中国原产，按一般进口消费申报；须另核对进口日期、钢材来源及任何排除、特殊减免或 Chapter 98 申报条件。",
+        "此处假定不符合美国冶炼浇铸金属来源的优惠条件；符合该条件的产品须另核对 232 优惠税率，不能直接按 75% 申报。",
+        "232 与 301 在此一般情形均按完整海关完税价格计征；75% 是本页列明三项的参考合计。",
+        "未计入反倾销、反补贴、海关手续费及其他可能适用费用；生产商、出口商和商品范围仍需另查。"
+      ],
+      "note": "这是经列明官方依据核对的一般情形参考，不是最终应缴税率，也不是对所有候选条款求和。政策核对截至 2026-11-23，须按实际申报条件确认。",
+      "sources": [
+        {
+          "title": "USITC：7308.90.30.00 与 Chapter 99 税则",
+          "url": "https://hts.usitc.gov/search?query=7308.90.30.00"
+        },
+        {
+          "title": "2026 年 6 月金属税附件 I-A：7308.90.30 列入 50% 清单（第 3 页）",
+          "url": "https://www.whitehouse.gov/wp-content/uploads/2026/06/Annex-I-A.pdf"
+        },
+        {
+          "title": "CBP：9903.82.02 加征 50%，按完整完税价格计征",
+          "url": "https://content.govdelivery.com/accounts/USDHSCBP/bulletins/4117593"
+        },
+        {
+          "title": "2026 年 6 月金属税调整及美国钢含量优惠条件",
+          "url": "https://www.whitehouse.gov/presidential-actions/2026/06/further-adjusting-the-tariff-regimes-for-imports-of-aluminum-steel-and-copper-into-the-united-states/"
+        },
+        {
+          "title": "USITC 对华税映射：7308.90.30 → 9903.88.02（第 175 页）",
+          "url": "https://learning.usitc.gov/hts-docs/documents/China%20Tariffs.pdf"
+        },
+        {
+          "title": "USITC：9903.88.02 对华加征 25% 及其排除条款",
+          "url": "https://hts.usitc.gov/search?query=9903.88.02"
+        },
+        {
+          "title": "CBP：2026-02-24 起停止征收 IEEPA 附加税",
+          "url": "https://content.govdelivery.com/bulletins/gd/USDHSCBP-40b11c9"
+        },
+        {
+          "title": "CBP：2026 年新增强迫劳动 301 税的 232 金属商品排除（9903.05.90）",
+          "url": "https://content.govdelivery.com/accounts/USDHSCBP/bulletins/421d887"
+        }
+      ]
+    }
+  ]
+}

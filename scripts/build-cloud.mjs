@@ -54,6 +54,8 @@ tariff = tariff.replace(readFileImport, `async function readFile(url) {
   return response.text();
 }`);
 await writeFile(path.join(OUTPUT, 'lib/tariff.mjs'), tariff);
+await cp(path.join(ROOT, 'lib/duty-assessment.mjs'), path.join(OUTPUT, 'lib/duty-assessment.mjs'));
+await cp(path.join(ROOT, 'data/reviewed-duty-rules.json'), path.join(OUTPUT, 'data/reviewed-duty-rules.json'));
 await cp(path.join(ROOT, 'templates/cloud-api.mjs'), path.join(OUTPUT, 'cloud-api.mjs'));
 await writeFile(path.join(OUTPUT, 'data/hts-full.json'), JSON.stringify(raw));
 await writeFile(path.join(OUTPUT, 'data/status.json'), JSON.stringify({ ...status, appId: 'tanji-tariff', deploymentMode: 'static_snapshot', buildVersion: '__BUILD_VERSION__' }));
